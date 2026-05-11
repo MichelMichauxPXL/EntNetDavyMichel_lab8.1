@@ -1,0 +1,36 @@
+name: Deploy naar router
+
+on:
+  push:
+    paths:
+      # Workflow triggert ALLEEN als deze bestanden gewijzigd worden
+      - 'davytest/router-config.xml'
+      - 'davytest/router-config.json'
+
+jobs:
+  deploy:
+    name: NETCONF + RESTCONF deployment
+    runs-on: self-hosted  # Draait op jouw eigen laptop (self-hosted runner)
+
+    steps:
+      # 1. Repo ophalen op de runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Python instellen
+      - name: Python instellen
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # 3. Dependencies installeren
+      - name: Libraries installeren
+        run: pip install ncclient requests
+
+      # 4. NETCONF script uitvoeren (Task 36)
+      - name: Task 36 – NETCONF deployment
+        run: python davytest/task36_netconf.py
+
+      # 5. RESTCONF script uitvoeren (Task 38)
+      - name: Task 38 – RESTCONF deployment
+        run: python davytest/task38_restconf.py

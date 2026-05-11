@@ -4,7 +4,7 @@ import sys
 
 # ---------- CONFIGUREER HIER JE PARAMETERS ----------
 
-GITHUB_RAW_URL = "https://raw.githubusercontent.com/MichelMichauxPXL/EntNetDavyMichel_lab8.1/d440adf7d40bea67f1594e939e3e13dee85bf847/task36/router01.xml"
+GITHUB_RAW_URL = "https://raw.githubusercontent.com/MichelMichauxPXL/EntNetDavyMichel_lab8.1/refs/heads/main/task36/router01.xml"
 
 DEVICE = {
     "host": "172.17.1.1",          # IP van je IOS-XE toestel

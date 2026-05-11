@@ -27,7 +27,7 @@ GITHUB_RAW_URL = (
 
 # Router verbindingsinstellingen
 ROUTER = {
-    "host":            "172.17.1.2",   # Management IP (VLAN 11)
+    "host":            "172.17.1.1",   # Management IP (VLAN 11)
     "port":            830,            # NETCONF standaard poort
     "username":        "admin",
     "password":        "cisco123",

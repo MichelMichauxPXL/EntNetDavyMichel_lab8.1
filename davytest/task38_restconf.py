@@ -26,7 +26,7 @@ GITHUB_RAW_URL = (
     "https://raw.githubusercontent.com/MichelMichauxPXL/EntNetDavyMichel_lab8.1/main/davytest/router-config.json"
 )
 
-ROUTER_IP   = "172.17.1.2"    # Management IP (VLAN 11)
+ROUTER_IP   = "172.17.1.1"    # Management IP (VLAN 11)
 ROUTER_PORT = 443
 USERNAME    = "admin"
 PASSWORD    = "cisco123"

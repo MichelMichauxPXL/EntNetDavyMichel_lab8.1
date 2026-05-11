@@ -112,4 +112,4 @@ yangtaken/
 | `HTTP 400` | Ongeldige JSON/XML payload | Config bestand valideren |
 | `HTTP 404` | RESTCONF pad bestaat niet | YANG Suite gebruiken om pad te verifiëren |
 | Candidate lock mislukt | Andere sessie heeft lock | Wachten of router herstarten |
-| SSH tunnel nodig | Geen direct netwerk | `ssh -L 8444:172.17.7.86:8443 yanguser@172.17.1.1` |
+| SSH tunnel nodig | Geen direct netwerk | `ssh -L 8444:172.17.7.86:8443 admin@172.17.1.1` | cisco123

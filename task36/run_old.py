@@ -43,11 +43,7 @@ def main():
     xml_config = fetch_xml(GITHUB_RAW_URL)
 
     print("[+] Verbinden met NETCONF device...")
-    m = manager.connect(**DEVICE)
-    if m is None:
-        raise Exception("Kan geen NETCONF sessie opzetten.")
-
-    try:
+    with manager.connect(**DEVICE) as m:
         print(f"[+] Verbonden. Session ID: {m.session_id}")
 
         # Detecteer datastore
@@ -62,8 +58,6 @@ def main():
             m.commit()
 
         print("[+] Config succesvol toegepast.")
-    finally:
-        m.close()
 
 
 if __name__ == "__main__":

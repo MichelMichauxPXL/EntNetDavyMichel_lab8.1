@@ -23,7 +23,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ─── Instellingen ────────────────────────────────────────────────────────────
 GITHUB_RAW_URL = (
-    "https://raw.githubusercontent.com/jouwuser/yangtaken/main/router-config.json"
+    "https://raw.githubusercontent.com/MichelMichauxPXL/EntNetDavyMichel_lab8.1/main/davytest/router-config.json"
 )
 
 ROUTER_IP   = "172.17.1.2"    # Management IP (VLAN 11)

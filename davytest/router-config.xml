@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  router-config.xml
+  =================
+  YANG-gebaseerde configuratie voor LAB-RA01-C01-R01
+  Gebaseerd op Cisco-IOS-XE-native YANG model
+  Single source of truth — opgeslagen in GitHub
+
+  Bevat:
+    - Hostname
+    - GigabitEthernet0/0/1 (WAN interface met IP)
+    - GigabitEthernet0/0/0 (trunk, no IP)
+    - Subinterfaces (VLAN 11, 12, 13, 14, 99)
+    - Default static route
+    - Loopback0
+    - OSPF process 1
+-->
+<config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native">
+
+    <!-- Hostname -->
+    <hostname>LAB-RA01-C01-R01</hostname>
+
+    <!-- Interfaces -->
+    <interface>
+
+      <!-- WAN Interface -->
+      <GigabitEthernet>
+        <name>0/0/1</name>
+        <description>WAN-uplink</description>
+        <ip>
+          <address>
+            <primary>
+              <address>10.199.65.101</address>
+              <mask>255.255.255.224</mask>
+            </primary>
+          </address>
+        </ip>
+        <shutdown xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                  nc:operation="delete"/>
+      </GigabitEthernet>
+
+      <!-- LAN trunk interface (geen IP, subinterfaces doen het werk) -->
+      <GigabitEthernet>
+        <name>0/0/0</name>
+        <description>LAN-trunk-richting-switch</description>
+        <shutdown xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+                  nc:operation="delete"/>
+      </GigabitEthernet>
+
+      <!-- Subinterface VLAN 11 Management -->
+      <GigabitEthernet>
+        <name>0/0/0.11</name>
+        <description>Management-VLAN11</description>
+        <encapsulation>
+          <dot1Q>
+            <vlan-id>11</vlan-id>
+          </dot1Q>
+        </encapsulation>
+        <ip>
+          <address>
+            <primary>
+              <address>172.17.1.2</address>
+              <mask>255.255.255.240</mask>
+            </primary>
+          </address>
+          <helper-address>
+            <address>10.199.64.66</address>
+          </helper-address>
+        </ip>
+      </GigabitEthernet>
+
+      <!-- Subinterface VLAN 12 Data Users -->
+      <GigabitEthernet>
+        <name>0/0/0.12</name>
+        <description>DataUsers-VLAN12</description>
+        <encapsulation>
+          <dot1Q>
+            <vlan-id>12</vlan-id>
+          </dot1Q>
+        </encapsulation>
+        <ip>
+          <address>
+            <primary>
+              <address>172.17.1.18</address>
+              <mask>255.255.255.240</mask>
+            </primary>
+          </address>
+          <helper-address>
+            <address>10.199.64.66</address>
+          </helper-address>
+        </ip>
+      </GigabitEthernet>
+
+      <!-- Subinterface VLAN 13 Voice -->
+      <GigabitEthernet>
+        <name>0/0/0.13</name>
+        <description>Voice-VLAN13</description>
+        <encapsulation>
+          <dot1Q>
+            <vlan-id>13</vlan-id>
+          </dot1Q>
+        </encapsulation>
+        <ip>
+          <address>
+            <primary>
+              <address>172.17.1.34</address>
+              <mask>255.255.255.240</mask>
+            </primary>
+          </address>
+          <helper-address>
+            <address>10.199.64.66</address>
+          </helper-address>
+        </ip>
+      </GigabitEthernet>
+
+      <!-- Subinterface VLAN 99 Native -->
+      <GigabitEthernet>
+        <name>0/0/0.99</name>
+        <description>Native-VLAN99</description>
+        <encapsulation>
+          <dot1Q>
+            <vlan-id>99</vlan-id>
+            <native/>
+          </dot1Q>
+        </encapsulation>
+      </GigabitEthernet>
+
+      <!-- Loopback0 -->
+      <Loopback>
+        <name>0</name>
+        <description>Loopback-management</description>
+        <ip>
+          <address>
+            <primary>
+              <address>1.1.1.1</address>
+              <mask>255.255.255.255</mask>
+            </primary>
+          </address>
+        </ip>
+      </Loopback>
+
+    </interface>
+
+    <!-- IP routing -->
+    <ip>
+      <route>
+        <ip-route-interface-forwarding-list>
+          <prefix>0.0.0.0</prefix>
+          <mask>0.0.0.0</mask>
+          <fwd-list>
+            <fwd>10.199.65.100</fwd>
+          </fwd-list>
+        </ip-route-interface-forwarding-list>
+      </route>
+    </ip>
+
+    <!-- OSPF -->
+    <router>
+      <ospf xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-ospf">
+        <id>1</id>
+        <network>
+          <ip>172.17.1.0</ip>
+          <mask>0.0.0.255</mask>
+          <area>0</area>
+        </network>
+        <network>
+          <ip>1.1.1.1</ip>
+          <mask>0.0.0.0</mask>
+          <area>0</area>
+        </network>
+      </ospf>
+    </router>
+
+  </native>
+</config>

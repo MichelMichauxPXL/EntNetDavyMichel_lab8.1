@@ -36,16 +36,12 @@
             </primary>
           </address>
         </ip>
-        <shutdown xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
-                  nc:operation="delete"/>
       </GigabitEthernet>
 
       <!-- LAN trunk interface (geen IP, subinterfaces doen het werk) -->
       <GigabitEthernet>
         <name>0/0/0</name>
         <description>LAN-trunk-richting-switch</description>
-        <shutdown xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
-                  nc:operation="delete"/>
       </GigabitEthernet>
 
       <!-- Subinterface VLAN 11 Management -->

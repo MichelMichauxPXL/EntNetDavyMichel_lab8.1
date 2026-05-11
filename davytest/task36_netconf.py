@@ -1,177 +1,152 @@
-"""
-Task 36 – NETCONF (Python)
-==========================
-Haalt een YANG-XML configuratiebestand op uit GitHub en deployt het
-via NETCONF op een Cisco IOS-XE toestel.
-
-Vereisten (uit projectopdracht):
-  - NETCONF + YANG
-  - Candidate datastore
-  - GitHub als single source of truth
-  - Foutafhandeling met discard-changes
-  - Statusinformatie expliciet zichtbaar (<ok/> of error)
-  - Pretty-print van XML responses
-"""
-
 import sys
 import requests
 from xml.dom.minidom import parseString
 from ncclient import manager
 from ncclient.operations import RPCError
 
-# ─── Instellingen ────────────────────────────────────────────────────────────
-# GitHub: raw URL naar je XML configuratiebestand
-GITHUB_RAW_URL = (
-    "https://raw.githubusercontent.com/jouwuser/yangtaken/main/router-config.xml"
-)
+# ==============================================================
+#  INSTELLINGEN
+# ==============================================================
+GITHUB_URL = "https://raw.githubusercontent.com/MichelMichauxPXL/EntNetDavyMichel_lab8.1/main/davytest/router-config.xml"
 
-# Router verbindingsinstellingen
 ROUTER = {
-    "host":            "172.17.1.1",   # Management IP (VLAN 11)
-    "port":            830,            # NETCONF standaard poort
-    "username":        "admin",
-    "password":        "cisco123",
-    "hostkey_verify":  False,
-    "device_params":   {"name": "iosxe"},
+    "host":           "172.17.1.1",   # Management IP van de router (VLAN 11)
+    "port":           830,            # NETCONF standaard poort
+    "username":       "admin",
+    "password":       "cisco123",
+    "hostkey_verify": False,          # Self-signed certificaat negeren
+    "device_params":  {"name": "iosxe"},
 }
 
+# ==============================================================
+#  HULPFUNCTIES
+# ==============================================================
 
-# ─── Hulpfuncties ────────────────────────────────────────────────────────────
-def pretty_xml(xml_str: str) -> str:
-    """Geeft XML terug als leesbaar geïndenteerd formaat."""
+def log(ok, tekst):
+    """Toont [+] bij succes of [-] bij fout."""
+    print(f"{'[+]' if ok else '[-]'} {tekst}")
+
+
+def pretty_xml(xml_str):
+    """Zet XML om naar leesbaar geïndenteerd formaat (toprettyxml)."""
     try:
         return parseString(xml_str).toprettyxml(indent="  ")
     except Exception:
-        return xml_str  # fallback als XML niet parseable is
+        return xml_str  # fallback als XML niet parseerbaar is
 
 
-def log(level: str, bericht: str):
-    """Eenvoudige logger met niveau-aanduiding."""
-    prefix = {"INFO": "[*]", "OK": "[+]", "FOUT": "[-]", "WARN": "[!]"}.get(level, "[?]")
-    print(f"{prefix} {bericht}")
-
-
-def check_rpc_ok(reply):
+def check_ok(reply):
     """
-    Controleert of een NETCONF RPC-reply <ok/> bevat.
-    Gooit een RuntimeError als de reply een fout bevat.
-    Retourneert True bij succes.
+    Controleert of de NETCONF RPC-reply een <ok/> bevat.
+    Dit is de standaard NETCONF statusfeedback bij een geslaagde operatie.
+    Gooit een fout als de reply een rpc-error bevat.
     """
-    reply_xml = str(reply)
-    log("INFO", "RPC-reply ontvangen:")
-    print(pretty_xml(reply_xml))
+    xml = str(reply)
+    print(pretty_xml(xml))  # Altijd tonen voor transparantie
 
-    if "<ok/>" in reply_xml or "<ok />" in reply_xml:
-        log("OK", "Statusfeedback: <ok/> — operatie geslaagd.")
+    if "<ok/>" in xml or "<ok />" in xml:
+        log(True, "Statusfeedback: <ok/> — operatie geslaagd.")
         return True
-    elif "rpc-error" in reply_xml:
-        # Haal error-tag en error-message op voor duidelijke foutmelding
-        dom = parseString(reply_xml)
-        error_tag  = dom.getElementsByTagNameNS("*", "error-tag")
-        error_msg  = dom.getElementsByTagNameNS("*", "error-message")
-        tag = error_tag[0].firstChild.nodeValue  if error_tag  else "onbekend"
-        msg = error_msg[0].firstChild.nodeValue  if error_msg  else "geen details"
-        raise RuntimeError(f"NETCONF fout — error-tag: {tag} | error-message: {msg}")
+    elif "rpc-error" in xml:
+        # Haal de foutdetails op uit de XML
+        dom = parseString(xml)
+        tag = dom.getElementsByTagNameNS("*", "error-tag")
+        msg = dom.getElementsByTagNameNS("*", "error-message")
+        tag_val = tag[0].firstChild.nodeValue if tag else "onbekend"
+        msg_val = msg[0].firstChild.nodeValue if msg else "geen details"
+        raise RuntimeError(f"NETCONF fout — error-tag: {tag_val} | bericht: {msg_val}")
     else:
-        log("WARN", "Reply bevat geen <ok/> maar ook geen rpc-error. Controleer handmatig.")
+        log(False, "Geen <ok/> en geen rpc-error — controleer handmatig.")
         return False
 
 
-# ─── Stap 1: Configuratie ophalen van GitHub ─────────────────────────────────
-def haal_config_op_van_github(url: str) -> str:
-    log("INFO", f"Configuratie ophalen van GitHub: {url}")
-    try:
-        resp = requests.get(url, timeout=15)
-        resp.raise_for_status()
-        log("OK", f"Config succesvol opgehaald ({len(resp.content)} bytes, HTTP {resp.status_code})")
-        return resp.text
-    except requests.exceptions.RequestException as e:
-        log("FOUT", f"Fout bij ophalen GitHub config: {e}")
-        sys.exit(1)
+# ==============================================================
+#  STAP 1 – CONFIG OPHALEN VAN GITHUB
+#  GitHub fungeert als single source of truth voor de YANG-XML config
+# ==============================================================
+print("=" * 55)
+print("  Task 36 – NETCONF deployment via GitHub")
+print("=" * 55)
 
+print(f"\n[*] Config ophalen van GitHub...")
+resp = requests.get(GITHUB_URL, timeout=15)
+if resp.status_code != 200:
+    log(False, f"GitHub ophalen mislukt (HTTP {resp.status_code})")
+    sys.exit(1)
 
-# ─── Stap 2: NETCONF deployment ──────────────────────────────────────────────
-def deploy_via_netconf(config_xml: str):
-    log("INFO", f"Verbinding maken met router {ROUTER['host']}:{ROUTER['port']} via NETCONF...")
+config_xml = resp.text
+log(True, f"Config opgehaald ({len(resp.content)} bytes, HTTP {resp.status_code})")
 
-    try:
-        with manager.connect(**ROUTER) as conn:
-            log("OK", f"Verbonden. Session-ID: {conn.session_id}")
+# Korte preview van de XML payload
+print("\n[*] XML payload preview (eerste 500 tekens):")
+print(pretty_xml(config_xml)[:500])
 
-            # ── Capabilities controleren ──────────────────────────────────
-            log("INFO", "Ondersteunde NETCONF capabilities:")
-            for cap in sorted(conn.server_capabilities):
-                print(f"    {cap}")
+# ==============================================================
+#  STAP 2 – DEPLOYMENT VIA NETCONF
+# ==============================================================
+print(f"\n[*] Verbinding maken met {ROUTER['host']}:{ROUTER['port']} via NETCONF...")
 
-            # ── Candidate datastore locken ────────────────────────────────
-            log("INFO", "Candidate datastore locken...")
-            try:
-                lock_reply = conn.lock(target="candidate")
-                check_rpc_ok(lock_reply)
-            except RPCError as e:
-                log("FOUT", f"Lock mislukt: {e}")
-                sys.exit(1)
+try:
+    with manager.connect(**ROUTER) as conn:
+        log(True, f"Verbonden — Session-ID: {conn.session_id}")
 
-            # ── edit-config naar candidate ────────────────────────────────
-            log("INFO", "edit-config uitvoeren naar candidate datastore...")
-            try:
-                edit_reply = conn.edit_config(
-                    target="candidate",
-                    config=config_xml,
-                )
-                check_rpc_ok(edit_reply)
-            except (RPCError, RuntimeError) as e:
-                log("FOUT", f"edit-config mislukt: {e}")
-                log("INFO", "discard-changes uitvoeren om candidate terug te zetten...")
-                discard_reply = conn.discard_changes()
-                check_rpc_ok(discard_reply)
-                log("INFO", "Candidate datastore unlocken...")
-                conn.unlock(target="candidate")
-                sys.exit(1)
+        # --- Candidate datastore locken ---
+        # Voorkomt dat andere sessies tegelijk wijzigingen maken
+        print("\n[*] Candidate datastore locken...")
+        try:
+            check_ok(conn.lock(target="candidate"))
+        except RPCError as e:
+            log(False, f"Lock mislukt: {e}")
+            sys.exit(1)
 
-            # ── Commit naar running ───────────────────────────────────────
-            log("INFO", "Commit uitvoeren naar running datastore...")
-            try:
-                commit_reply = conn.commit()
-                check_rpc_ok(commit_reply)
-                log("OK", "Configuratie succesvol gecommit naar running.")
-            except (RPCError, RuntimeError) as e:
-                log("FOUT", f"Commit mislukt: {e}")
-                log("INFO", "discard-changes uitvoeren...")
-                conn.discard_changes()
-                conn.unlock(target="candidate")
-                sys.exit(1)
+        # --- edit-config naar candidate ---
+        # Stuurt de volledige YANG-XML config naar de candidate datastore
+        # Bij fout: discard-changes zodat candidate schoon blijft
+        print("\n[*] edit-config uitvoeren naar candidate...")
+        try:
+            check_ok(conn.edit_config(target="candidate", config=config_xml))
+        except (RPCError, RuntimeError) as e:
+            log(False, f"edit-config mislukt: {e}")
+            print("[*] discard-changes uitvoeren (candidate terugzetten)...")
+            check_ok(conn.discard_changes())
+            conn.unlock(target="candidate")
+            sys.exit(1)
 
-            # ── Candidate datastore unlocken ──────────────────────────────
-            log("INFO", "Candidate datastore unlocken...")
-            unlock_reply = conn.unlock(target="candidate")
-            check_rpc_ok(unlock_reply)
+        # --- Commit naar running ---
+        # Maakt de wijzigingen actief op het toestel
+        # Bij fout: discard-changes om alles terug te draaien
+        print("\n[*] Commit uitvoeren naar running...")
+        try:
+            check_ok(conn.commit())
+            log(True, "Configuratie succesvol gecommit naar running.")
+        except (RPCError, RuntimeError) as e:
+            log(False, f"Commit mislukt: {e}")
+            print("[*] discard-changes uitvoeren...")
+            check_ok(conn.discard_changes())
+            conn.unlock(target="candidate")
+            sys.exit(1)
 
-            # ── Verificatie: running config ophalen ───────────────────────
-            log("INFO", "Verificatie: running-config ophalen via NETCONF get-config...")
-            running = conn.get_config(source="running")
-            log("OK", "Running-config ontvangen (eerste 2000 tekens):")
-            print(pretty_xml(str(running))[:2000])
+        # --- Candidate datastore unlocken ---
+        # Altijd unlocken, ook na succes
+        print("\n[*] Candidate datastore unlocken...")
+        check_ok(conn.unlock(target="candidate"))
 
-    except Exception as e:
-        log("FOUT", f"Onverwachte fout: {e}")
-        sys.exit(1)
+        # ==============================================================
+        #  STAP 3 – VERIFICATIE
+        #  Haalt de volledige running-config op via NETCONF get-config
+        # ==============================================================
+        print("\n[*] Verificatie: running-config ophalen via get-config...")
+        running = conn.get_config(source="running")
+        log(True, "Running-config ontvangen (preview eerste 1500 tekens):")
+        print(pretty_xml(str(running))[:1500])
 
+except Exception as e:
+    log(False, f"Onverwachte fout: {e}")
+    sys.exit(1)
 
-# ─── Main ─────────────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    print("=" * 60)
-    print("  Task 36 – NETCONF Deployment via GitHub (Python)")
-    print("=" * 60)
-
-    config_xml = haal_config_op_van_github(GITHUB_RAW_URL)
-
-    print("\n--- GitHub XML payload (preview) ---")
-    print(pretty_xml(config_xml)[:1000])
-    print("---\n")
-
-    deploy_via_netconf(config_xml)
-
-    print("\n" + "=" * 60)
-    print("  Deployment voltooid.")
-    print("=" * 60)
+# ==============================================================
+#  RESULTAAT
+# ==============================================================
+print("\n" + "=" * 55)
+log(True, "Deployment volledig geslaagd!")
+print("=" * 55)

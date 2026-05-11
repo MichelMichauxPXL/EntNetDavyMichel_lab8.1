@@ -1,0 +1,146 @@
+{
+  "Cisco-IOS-XE-native:native": {
+
+    "hostname": "LAB-RA01-C01-R01",
+
+    "interface": {
+      "GigabitEthernet": [
+        {
+          "name": "0/0/1",
+          "description": "WAN-uplink",
+          "ip": {
+            "address": {
+              "primary": {
+                "address": "10.199.65.101",
+                "mask": "255.255.255.224"
+              }
+            }
+          }
+        },
+        {
+          "name": "0/0/0",
+          "description": "LAN-trunk-richting-switch"
+        },
+        {
+          "name": "0/0/0.11",
+          "description": "Management-VLAN11",
+          "encapsulation": {
+            "dot1Q": {
+              "vlan-id": 11
+            }
+          },
+          "ip": {
+            "address": {
+              "primary": {
+                "address": "172.17.1.2",
+                "mask": "255.255.255.240"
+              }
+            },
+            "helper-address": [
+              { "address": "10.199.64.66" }
+            ]
+          }
+        },
+        {
+          "name": "0/0/0.12",
+          "description": "DataUsers-VLAN12",
+          "encapsulation": {
+            "dot1Q": {
+              "vlan-id": 12
+            }
+          },
+          "ip": {
+            "address": {
+              "primary": {
+                "address": "172.17.1.18",
+                "mask": "255.255.255.240"
+              }
+            },
+            "helper-address": [
+              { "address": "10.199.64.66" }
+            ]
+          }
+        },
+        {
+          "name": "0/0/0.13",
+          "description": "Voice-VLAN13",
+          "encapsulation": {
+            "dot1Q": {
+              "vlan-id": 13
+            }
+          },
+          "ip": {
+            "address": {
+              "primary": {
+                "address": "172.17.1.34",
+                "mask": "255.255.255.240"
+              }
+            },
+            "helper-address": [
+              { "address": "10.199.64.66" }
+            ]
+          }
+        },
+        {
+          "name": "0/0/0.99",
+          "description": "Native-VLAN99",
+          "encapsulation": {
+            "dot1Q": {
+              "vlan-id": 99,
+              "native": {}
+            }
+          }
+        }
+      ],
+      "Loopback": [
+        {
+          "name": 0,
+          "description": "Loopback-management",
+          "ip": {
+            "address": {
+              "primary": {
+                "address": "1.1.1.1",
+                "mask": "255.255.255.255"
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "ip": {
+      "route": {
+        "ip-route-interface-forwarding-list": [
+          {
+            "prefix": "0.0.0.0",
+            "mask": "0.0.0.0",
+            "fwd-list": [
+              { "fwd": "10.199.65.100" }
+            ]
+          }
+        ]
+      }
+    },
+
+    "router": {
+      "ospf": [
+        {
+          "id": 1,
+          "network": [
+            {
+              "ip": "172.17.1.0",
+              "mask": "0.0.0.255",
+              "area": 0
+            },
+            {
+              "ip": "1.1.1.1",
+              "mask": "0.0.0.0",
+              "area": 0
+            }
+          ]
+        }
+      ]
+    }
+
+  }
+}

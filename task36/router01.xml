@@ -1,5 +1,5 @@
 <config xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
   <native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native">
-    <hostname>LAB-RA01-C01-R01-TEST36</hostname>
+    <hostname>LAB-RA01-C01-R01-TEST</hostname>
   </native>
 </config>

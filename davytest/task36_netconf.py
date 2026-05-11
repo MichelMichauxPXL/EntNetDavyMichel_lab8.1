@@ -22,7 +22,7 @@ from ncclient.operations import RPCError
 # ─── Instellingen ────────────────────────────────────────────────────────────
 # GitHub: raw URL naar je XML configuratiebestand
 GITHUB_RAW_URL = (
-    "https://raw.githubusercontent.com/jouwuser/yangtaken/main/router-config.xml"
+    "https://raw.githubusercontent.com/MichelMichauxPXL/EntNetDavyMichel_lab8.1/main/davytest/router-config.xml"
 )
 
 # Router verbindingsinstellingen

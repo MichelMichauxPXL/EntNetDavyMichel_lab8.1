@@ -122,12 +122,6 @@ if "ip" in native and "route" in native["ip"]:
                  "Static route"):
         fouten.append("static route")
 
-# 5. OSPF
-for proc in native.get("router", {}).get("ospf", []):
-    pad = f"Cisco-IOS-XE-native:native/router/ospf={proc['id']}"
-    if not put(pad, {"Cisco-IOS-XE-native:ospf": proc}, f"OSPF {proc['id']}"):
-        fouten.append(f"OSPF {proc['id']}")
-
 # ─── Stap 3: Verificatie ──────────────────────────────────────────────────────
 print("\n" + "=" * 55)
 print("  Verificatie via RESTCONF GET")

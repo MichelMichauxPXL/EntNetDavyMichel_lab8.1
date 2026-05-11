@@ -22,7 +22,7 @@ GITHUB_RAW_URL = (
 ROUTER_IP   = "172.17.1.1"
 ROUTER_PORT = 443
 USERNAME    = "admin"
-PASSWORD    = "Cisco123"
+PASSWORD    = "cisco123"
 
 BASE_URL = f"https://{ROUTER_IP}:{ROUTER_PORT}/restconf/data"
 

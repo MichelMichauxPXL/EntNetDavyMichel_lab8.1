@@ -1,0 +1,11 @@
+﻿{
+  "agentId": 2,
+  "agentName": "MICHELM-LAPTOP",
+  "poolId": 1,
+  "poolName": "Default",
+  "serverUrl": "https://pipelinesghubeus9.actions.githubusercontent.com/1jVHhThbw42j7fWuMdR7O8NecMNKjJivkkpY1hRm0vQ6MRN1yY/",
+  "gitHubUrl": "https://github.com/MichelMichauxPXL/EntNetDavyMichel_lab8.1",
+  "workFolder": "_work",
+  "useV2Flow": true,
+  "serverUrlV2": "https://broker.actions.githubusercontent.com/"
+}

@@ -19,7 +19,7 @@
   <native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native">
 
     <!-- Hostname -->
-    <hostname>LAB-RA01-C01-R01</hostname>
+    <hostname>LAB-RA01-C01-R01-test</hostname>
 
     <!-- Interfaces -->
     <interface>

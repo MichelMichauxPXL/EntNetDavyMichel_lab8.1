@@ -1,6 +1,6 @@
 ﻿{
-  "agentId": 2,
-  "agentName": "MICHELM-LAPTOP",
+  "agentId": 3,
+  "agentName": "runner-michel",
   "poolId": 1,
   "poolName": "Default",
   "serverUrl": "https://pipelinesghubeus9.actions.githubusercontent.com/1jVHhThbw42j7fWuMdR7O8NecMNKjJivkkpY1hRm0vQ6MRN1yY/",

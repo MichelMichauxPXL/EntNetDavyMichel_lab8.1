@@ -1,7 +1,7 @@
 {
   "Cisco-IOS-XE-native:native": {
 
-    "hostname": "LAB-RA01-C01-R01",
+    "hostname": "LAB-RA01-C01-R01-test",
 
     "interface": {
       "GigabitEthernet": [

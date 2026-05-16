@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy:
-    name: NETCONF + RESTCONF deployment
+    name: MICHELM-LAPTOP
     runs-on: self-hosted  # Draait op jouw eigen laptop (self-hosted runner)
 
     steps:
